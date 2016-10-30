@@ -1,8 +1,8 @@
 ﻿namespace QuickApp.MongoDb
 {
-    public static class QuickAppConfigurationExtensions
+    public static class QuickAppExtensions
     {
-        public static QuickAppConfiguration AddMongoService(this QuickAppConfiguration app, string connectionString,
+        public static QuickApplication AddMongoService(this QuickApplication app, string connectionString,
             string databaseName, string serviceName = null)
         {
             if (serviceName == null)

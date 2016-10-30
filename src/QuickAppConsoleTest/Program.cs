@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Bson.IO;
 using Newtonsoft.Json.Linq;
 using QuickApp;
 using QuickApp.MongoDb;
-using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace QuickAppConsoleTest
 {
@@ -23,7 +18,7 @@ namespace QuickAppConsoleTest
     {
         public static void Main(string[] args)
         {
-            var app = new QuickAppConfiguration();
+            var app = new QuickApplication();
             app.AddService(typeof(Service1), () => new Service1());
             app.AddService(typeof(IMongoDbDatabaseService),
                 () => new MongoDbDatabaseService("mongodb://localhost:27017", "prueba"));

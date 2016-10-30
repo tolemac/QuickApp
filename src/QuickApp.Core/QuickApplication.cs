@@ -3,30 +3,30 @@ using Newtonsoft.Json.Linq;
 
 namespace QuickApp
 {
-    public class QuickAppConfiguration
+    public class QuickApplication
     {
         private readonly ServiceContainer _serviceContainer;
         private readonly ServiceMethodCaller _serviceMethodCaller;
 
-        public QuickAppConfiguration()
+        public QuickApplication()
         {
             _serviceContainer = new ServiceContainer();
             _serviceMethodCaller = new ServiceMethodCaller(_serviceContainer);
         }
 
-        public QuickAppConfiguration AddService(Type serviceType, Func<object> creatorFunc)
+        public QuickApplication AddService(Type serviceType, Func<object> creatorFunc)
         {
             _serviceContainer.AddService(serviceType, creatorFunc);
             return this;
         }
 
-        public QuickAppConfiguration AddService(Type serviceType, string serviceName, Func<object> creatorFunc)
+        public QuickApplication AddService(Type serviceType, string serviceName, Func<object> creatorFunc)
         {
             _serviceContainer.AddService(serviceType, serviceName, creatorFunc);
             return this;
         }
 
-        public QuickAppConfiguration AddService(Type serviceType, object instance)
+        public QuickApplication AddService(Type serviceType, object instance)
         {
             _serviceContainer.AddService(serviceType, instance);
             return this;

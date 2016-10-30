@@ -4,9 +4,9 @@ namespace QuickApp.Web.Mvc
 {
     public class QuickAppController
     {
-        private readonly QuickAppConfiguration _app;
+        private readonly QuickApplication _app;
 
-        public QuickAppController(QuickAppConfiguration app)
+        public QuickAppController(QuickApplication app)
         {
             _app = app;
         }

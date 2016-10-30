@@ -4,9 +4,9 @@ namespace QuickApp
 {
     public static class ServiceCollectionExtensions
     {
-        public static QuickAppConfiguration AddQuickApp(this IServiceCollection serviceCollection)
+        public static QuickApplication AddQuickApp(this IServiceCollection serviceCollection)
         {
-            var app = new QuickAppConfiguration();
+            var app = new QuickApplication();
             serviceCollection.AddSingleton(provider => app);
             return app;
         }

@@ -1,15 +1,15 @@
 **English version comming soon.**
 
 Este fichero readme está creado de fragmentos de conversaciones por chat, mis disculpas por la informalidad.
-**Versión formal de este fichero, proximamente.**
+**Versión formal de este fichero, próximamente.**
 
 ## Historia 
 
 Este proyecto sale de una pregunta que hice a unos amigos, el mensaje que envié fue este, literal:
 
 >Estoy pensando en hacerme una cosa y previendo que ya estará hecho he decidido escribir antes a unos cuantos para ver si conocéis algo que lo haga.
-Tras hacer una pruebas con MongoDb y conocer también Firebase (de Google) se me ha ocurrido hacerme una pequeña librería para acceder a una base de datos MongoDb desde un cliente JavaScript, a traves de peticiones ajax a un servidor. Parecido a lo que ofrece Firebase pero trabajando contra un MongoDb. Tener acciones InsertOne, UpdateOne, Find, ... Hasta ahí todo es fácil, con un controlador MVC (o usar NancyFX ya veré) pongo acciones para cada una de la operaciones y paso el payload de la petición a las llamadas a MongoDb según corresponda en cada acción. En cierto modo sería emular un poco Firebase pero con servidor propio. 
-Lo que quiero añadir hacer es que puedas definir reglas de negocio a la hora de realizar operaciones contra la base de datos, por ejemplo que antes de insertar en la collección "Posts" asigne automáticamente el id del usuario actual en el campo "userId":
+Tras hacer unas pruebas con MongoDb y conocer también Firebase (de Google) se me ha ocurrido hacerme una pequeña librería para acceder a una base de datos MongoDb desde un cliente JavaScript, a través de peticiones ajax a un servidor. Parecido a lo que ofrece Firebase pero trabajando contra un MongoDb. Tener acciones InsertOne, UpdateOne, Find, ... Hasta ahí todo es fácil, con un controlador MVC (o usar NancyFX ya veré) pongo acciones para cada una de la operaciones y paso el payload de la petición a las llamadas a MongoDb según corresponda en cada acción. En cierto modo sería emular un poco Firebase pero con servidor propio. 
+Lo que quiero añadir hacer es que puedas definir reglas de negocio a la hora de realizar operaciones contra la base de datos, por ejemplo que antes de insertar en la colección "Posts" asigne automáticamente el id del usuario actual en el campo "userId":
 
 ```` C#
 public void beforeInsertPost(dynamic post) {
@@ -46,7 +46,7 @@ miJsMongoDbAccess.collection("products").find({ amount: { $gte: 50 } }).then((re
 >Mi pregunta es, ¿conocéis algo que cubra esto o que se asemeje un poco?
 
 
-Basicamente lo que que quería era poder crear el backend de una applicación de forma rápida, sin tener que escribir mucho boilerplate.
+Básicamente lo que quería era poder crear el backend de una aplicación de forma rápida, sin tener que escribir mucho boilerplate.
 La cosa es que estás en tu casa y se te ocurre una chorrada de app, te creas el proyecto web en Visual studio, añades una referencia al proyecto, y puedes ir guardando y consultando cosas desde javascript, luego si vas a más pues puedes añadir reglas de negocio para controlar cosas y tal.
 
 ## Primer preview
@@ -69,7 +69,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ````
 
-Luego vas a metodo Configure y añades una ruta al MVC:
+Luego vas a método Configure y añades una ruta al MVC:
 
 ```` C#
 app.UseMvc(routes =>
@@ -119,16 +119,16 @@ $("#quickAppButton").click(function () {
 });
 ````
 
-Al final, todo se basa en una acción de un controlador mvc, el cual recibe un nombre de servicio y un nombre de un método. En el payload van los argumentos que pueda necesitar ese metodo. Por reflexión llama al metodo del servicio pasandole los argumentos del payload.
+Al final, todo se basa en una acción de un controlador mvc, el cual recibe un nombre de servicio y un nombre de un método. En el payload van los argumentos que pueda necesitar ese método. Por reflexión llama al método del servicio pasándole los argumentos del payload.
 Los servicios que se ejecutan deben haberse añadido a una colección interna, si no están ahí no se pueden llamar.
 
-Si se hace un HTTP POST /QuickApp/servicioChachi/SuperMetodo { param1: 0, param2: ""}, se buscará un servicio "servicioChachi", en el que se busca un metodo "SuperMetodo" que acepte los parametros "param1" y "param2". Si existe lo ejecuta y devuelve el resultado.
+Si se hace un HTTP POST /QuickApp/servicioChachi/SuperMetodo { param1: 0, param2: ""}, se buscará un servicio "servicioChachi", en el que se busca un método "SuperMetodo" que acepte los parámetros "param1" y "param2". Si existe lo ejecuta y devuelve el resultado.
 
 El paquete viene con un servicio para MongoDb con las cosas más comunes, InsertOne, InsertMany, Find, Count, Update, ... se registra ese servicio con un nombre, por defecto "mongodb", y ya se puede hacer uso de él.
 
 Como cosas a hacer, a priori, tengo:
 
-- Añadir una forma facil para interceptar la llamada a los metodos, antes y despues, para poder meter reglas de negocio.
+- Añadir una forma fácil para interceptar la llamada a los métodos, antes y después, para poder meter reglas de negocio.
 - Intentar añadir un servicio para otra base de datos para poner a prueba la versatilidad y viabilidad del proyecto.
 - Facilitar el tema de autenticación en web (sin usar Identity de los cojones, ni EF), añadir autenticación por cookies, habilitando algún servicio para gestionar usuarios.
 - Establecer una unión sencilla entre la gestión de usuarios (y otras entidades que puedan ser comunes, como configuración y tal) y cada servicio de cada base de datos para poder persistirlos.

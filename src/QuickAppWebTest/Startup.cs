@@ -35,8 +35,13 @@ namespace QuickAppWebTest
             // Add framework services.
             services.AddMvc();
 
-            services
-                .AddQuickApp()
+            // Add QuickApp
+            services.AddQuickApp(QuickAppConfig);
+        }
+
+        private void QuickAppConfig(QuickApplication quickApp)
+        {
+            quickApp
                 .AddMongoService("mongodb://localhost:27017", "QuickAppTest", "mongodb")
                 .AddInterceptor("mongodb", "InsertOne", Moment.Before, context =>
                 {
@@ -45,7 +50,7 @@ namespace QuickAppWebTest
                 })
                 .AddInterceptor("mongodb", "Find", Moment.After, context =>
                 {
-                    context.Result.Add(new {name = "From", surname = "After Find Interceptor"});
+                    context.Result.Add(new { name = "From", surname = "After Find Interceptor" });
                 })
                 .AddInterceptor("mongodb", new MongoInterceptorImplementingInterface())
                 .AddInterceptor("mongodb", new MongoInterceptorUsingMethodsNames());

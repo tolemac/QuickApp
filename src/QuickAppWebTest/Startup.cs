@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuickApp;
 using QuickApp.MongoDb;
+using QuickApp.Services.Interceptors;
 using QuickApp.Web.Mvc;
 
 namespace QuickAppWebTest
@@ -34,7 +35,20 @@ namespace QuickAppWebTest
             // Add framework services.
             services.AddMvc();
 
-            services.AddQuickApp().AddMongoService("mongodb://localhost:27017", "QuickAppTest");
+            services
+                .AddQuickApp()
+                .AddMongoService("mongodb://localhost:27017", "QuickAppTest", "mongodb")
+                .AddInterceptor("mongodb", "InsertOne", Moment.Before, context =>
+                {
+                    context.Arguments.document.name += " 2";
+                    context.Arguments.document.userId = 44;
+                })
+                .AddInterceptor("mongodb", "Find", Moment.After, context =>
+                {
+                    context.Result.Add(new {name = "From", surname = "After Find Interceptor"});
+                })
+                .AddInterceptor("mongodb", new MongoInterceptorImplementingInterface())
+                .AddInterceptor("mongodb", new MongoInterceptorUsingMethodsNames());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

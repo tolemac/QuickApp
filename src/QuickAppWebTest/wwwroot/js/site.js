@@ -16,7 +16,8 @@ $("#quickAppButton").click(function () {
 
         var findData = {
             collectionName: "People",
-            filter: {}
+            filter: {},
+            take: 100
         };
         $.ajax("/qa/mongodb/Find",
             {
@@ -26,7 +27,7 @@ $("#quickAppButton").click(function () {
                 data: JSON.stringify(findData)
             }).success(function (data) {
                 for (var i = 0, j = data.length; i < j; i++) {
-                    alert(data[i].name + " " + data[i].surname);
+                    alert(data[i].name + " " + data[i].surname + (data[i].userId? " user id:" + data[i].userId : ""));
                 }
             });
     });

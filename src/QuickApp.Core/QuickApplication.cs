@@ -1,5 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
+using QuickApp.Services;
+using QuickApp.Services.Interceptors;
 
 namespace QuickApp
 {
@@ -32,16 +34,27 @@ namespace QuickApp
             return this;
         }
 
-        public object CallServiceMethod(string serviceName, string methodName, object parameters)
+        public object CallServiceMethod(string serviceName, string methodName, object arguments)
         {
-            return CallServiceMethod(serviceName, methodName, JObject.FromObject(parameters));
+            return CallServiceMethod(serviceName, methodName, JObject.FromObject(arguments));
         }
 
-        public object CallServiceMethod(string serviceName, string methodName, JObject parameters)
+        public object CallServiceMethod(string serviceName, string methodName, JObject arguments)
         {
-            return _serviceMethodCaller.Call(serviceName, methodName, parameters);
+            return _serviceMethodCaller.Call(serviceName, methodName, arguments);
         }
 
+        public QuickApplication AddInterceptor(string serviceName, string methodName, 
+            Moment when, Action<CallContext> action)
+        {
+            _serviceContainer.GetServiceDescriptorByName(serviceName).AddInterceptor(methodName, when, action);
+            return this;
+        }
 
+        public QuickApplication AddInterceptor(string serviceName, IServiceMethodCallInterceptor interceptor)
+        {
+            _serviceContainer.GetServiceDescriptorByName(serviceName).AddInterceptor(interceptor);
+            return this;
+        }
     }
 }

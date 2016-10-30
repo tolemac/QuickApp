@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace QuickApp
+namespace QuickApp.Services
 {
     public class ServiceContainer
     {
-        private readonly List<Tuple<Type, string, Func<object>>> _serviceList = new List<Tuple<Type, string, Func<object>>>();
+        private readonly Dictionary<string, ServiceDescriptor> _services = new Dictionary<string, ServiceDescriptor>();
 
         public ServiceContainer AddService<TService>(Func<TService> creatorFunc = null)
         {
@@ -20,7 +20,7 @@ namespace QuickApp
 
         public ServiceContainer AddService(Type serviceType, string serviceName, Func<object> creatorFunc = null)
         {
-            _serviceList.Add(new Tuple<Type, string, Func<object>>(serviceType, serviceName, creatorFunc));
+            _services.Add(serviceName, new ServiceDescriptor(serviceName, serviceType, creatorFunc));
             return this;
         }
 
@@ -36,7 +36,7 @@ namespace QuickApp
 
         public ServiceContainer AddService(Type serviceType, string serviceName, object instance)
         {
-            _serviceList.Add(new Tuple<Type, string, Func<object>>(serviceType, serviceName, () => instance));
+            _services.Add(serviceName, new ServiceDescriptor(serviceName, serviceType, () => instance));
             return this;
         }
 
@@ -47,22 +47,10 @@ namespace QuickApp
                        && currentServiceName.Substring(1).Equals(serviceToMatch, StringComparison.CurrentCultureIgnoreCase));
         }
 
-        private Tuple<Type, string, Func<object>> GetServiceTupleByName(string name)
+        public ServiceDescriptor GetServiceDescriptorByName(string name)
         {
-            return _serviceList.FirstOrDefault(t => MatchServiceName(name, t.Item2));
+            return _services.Where(p => MatchServiceName(name, p.Key)).Select(p => p.Value).FirstOrDefault();
         }
 
-        public object ResolveServiceByName(string name)
-        {
-            var tuple = GetServiceTupleByName(name);
-
-            if (tuple.Item3 != null)
-            {
-                return tuple.Item3();
-            }
-
-            return ServiceActivator.Activate(tuple.Item1);
-
-        }
     }
 }

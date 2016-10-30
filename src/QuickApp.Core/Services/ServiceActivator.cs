@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QuickApp
+namespace QuickApp.Services
 {
     internal class ServiceActivator
     {

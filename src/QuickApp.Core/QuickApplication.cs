@@ -23,21 +23,9 @@ namespace QuickApp
             _serviceMethodCaller = new ServiceMethodCaller(_serviceContainer);
         }
 
-        public QuickApplication AddService(Type serviceType, Func<object> creatorFunc)
+        public QuickApplication AddService(ServiceDescriptor serviceDescriptor)
         {
-            _serviceContainer.AddService(serviceType, creatorFunc);
-            return this;
-        }
-
-        public QuickApplication AddService(Type serviceType, string serviceName, Func<object> creatorFunc)
-        {
-            _serviceContainer.AddService(serviceType, serviceName, creatorFunc);
-            return this;
-        }
-
-        public QuickApplication AddService(Type serviceType, object instance)
-        {
-            _serviceContainer.AddService(serviceType, instance);
+            _serviceContainer.AddService(serviceDescriptor);
             return this;
         }
 

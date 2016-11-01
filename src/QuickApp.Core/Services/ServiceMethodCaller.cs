@@ -6,7 +6,7 @@ using QuickApp.Services.Interceptors;
 
 namespace QuickApp.Services
 {
-    public class ServiceMethodCaller
+    internal class ServiceMethodCaller
     {
         private readonly ServiceContainer _container;
 

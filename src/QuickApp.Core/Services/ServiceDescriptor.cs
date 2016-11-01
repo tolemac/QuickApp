@@ -18,6 +18,12 @@ namespace QuickApp.Services
         public Type Type { get; }
         public Func<object> CreationFunc { get; }
 
+        public bool RequireAuth { get; set; } = true;
+
+        public ServiceDescriptor(object instance) : this(instance.GetType(), instance) { }
+        public ServiceDescriptor(Type type, object instance) : this(type.Name, type, instance) { }
+        public ServiceDescriptor(Type type, Func<object> creationFunc) : this(type.Name, type, creationFunc) { }
+        public ServiceDescriptor(string name, Type type, object instance) : this(name, type, () => instance) { }
 
         public ServiceDescriptor(string name, Type type, Func<object> creationFunc)
         {

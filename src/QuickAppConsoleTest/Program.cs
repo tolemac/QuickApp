@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using QuickApp;
 using QuickApp.MongoDb;
+using QuickApp.Services;
 
 namespace QuickAppConsoleTest
 {
@@ -19,19 +20,19 @@ namespace QuickAppConsoleTest
         public static void Main(string[] args)
         {
             var app = new QuickApplication();
-            app.AddService(typeof(Service1), () => new Service1());
-            app.AddService(typeof(IMongoDbDatabaseService),
-                () => new MongoDbDatabaseService("mongodb://localhost:27017", "prueba"));
+            app.AddService(new ServiceDescriptor(typeof(Service1), () => new Service1()));
+            app.AddService(new ServiceDescriptor(typeof(IMongoDbDatabaseService),
+                () => new MongoDbDatabaseService("mongodb://localhost:27017", "prueba")));
 
-            //app.CallServiceMethod("MongoDbDataBaseService", "InsertOne", new
-            //{
-            //    collectionName = "People",
-            //    document = new
-            //    {
-            //        nombre = "Javier",
-            //        surName = "Ros"
-            //    }
-            //});
+            app.CallServiceMethod("MongoDbDataBaseService", "InsertOne", new
+            {
+                collectionName = "People",
+                document = new
+                {
+                    nombre = "Javier",
+                    surName = "Ros"
+                }
+            });
             //app.CallServiceMethod("MongoDbDataBaseService", "InsertMany", new
             //{
             //    collectionName = "People",

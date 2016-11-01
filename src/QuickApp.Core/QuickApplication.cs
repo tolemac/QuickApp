@@ -7,11 +7,18 @@ namespace QuickApp
 {
     public class QuickApplication
     {
+        public IServiceProvider ServiceProvider { get; set; }
         private readonly ServiceContainer _serviceContainer;
         private readonly ServiceMethodCaller _serviceMethodCaller;
 
-        public QuickApplication()
+        public QuickApplication() : this(null)
         {
+
+        }
+
+        public QuickApplication(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
             _serviceContainer = new ServiceContainer();
             _serviceMethodCaller = new ServiceMethodCaller(_serviceContainer);
         }

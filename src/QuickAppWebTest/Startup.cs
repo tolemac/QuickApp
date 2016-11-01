@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,13 +31,14 @@ namespace QuickAppWebTest
             services.AddMvc();
 
             // Add QuickApp
-            services.AddQuickApp(QuickAppConfig);
+            services.AddQuickApp();
+            services.AddQuickAppMongoService("mongodb://localhost:27017", "QuickAppTest");
         }
 
         private void QuickAppConfig(QuickApplication quickApp)
         {
             quickApp
-                .AddMongoService("mongodb://localhost:27017", "QuickAppTest", "mongodb")
+                .AddMongoService("mongodb")
                 .AddInterceptor("mongodb", "InsertOne", Moment.Before, context =>
                 {
                     context.Arguments.document.name += " 2";
@@ -73,6 +69,8 @@ namespace QuickAppWebTest
             }
 
             app.UseStaticFiles();
+
+            app.UseQuickApp(QuickAppConfig);
 
             app.UseMvc(routes =>
             {

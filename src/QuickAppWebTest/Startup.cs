@@ -7,8 +7,8 @@ using QuickApp;
 using QuickApp.AspNetCore.Auth;
 using QuickApp.MongoDb;
 using QuickApp.Services.Interceptors;
-using QuickApp.Web.Mvc;
 using System.Linq;
+using QuickApp.AspNetCore.Mvc;
 
 namespace QuickAppWebTest
 {

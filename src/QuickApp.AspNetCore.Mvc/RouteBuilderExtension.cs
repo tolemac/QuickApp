@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 
-namespace QuickApp.Web.Mvc
+namespace QuickApp.AspNetCore.Mvc
 {
     public static class RouteBuilderExtension
     {

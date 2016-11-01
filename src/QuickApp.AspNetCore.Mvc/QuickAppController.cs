@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace QuickApp.Web.Mvc
+namespace QuickApp.AspNetCore.Mvc
 {
     public class QuickAppController
     {

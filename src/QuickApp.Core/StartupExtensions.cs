@@ -12,10 +12,10 @@ namespace QuickApp
             return serviceCollection;
         }
 
-        public static IApplicationBuilder UseQuickApp(this IApplicationBuilder app, Action<QuickApplication> configAction)
+        public static IApplicationBuilder UseQuickApp(this IApplicationBuilder app, Action<QuickApplication, IApplicationBuilder> configAction)
         {
             var quickApp = app.ApplicationServices.GetService<QuickApplication>();
-            configAction.Invoke(quickApp);
+            configAction.Invoke(quickApp, app);
             return app;
         }
     }

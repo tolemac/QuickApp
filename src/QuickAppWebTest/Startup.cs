@@ -4,9 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuickApp;
+using QuickApp.AspNetCore.Auth;
 using QuickApp.MongoDb;
 using QuickApp.Services.Interceptors;
 using QuickApp.Web.Mvc;
+using System.Linq;
 
 namespace QuickAppWebTest
 {
@@ -33,12 +35,22 @@ namespace QuickAppWebTest
             // Add QuickApp
             services.AddQuickApp();
             services.AddQuickAppMongoService("mongodb://localhost:27017", "QuickAppTest");
+            services.AddQuickAppBasicAuth<AuthUser>(ConfigAuth);
         }
 
-        private void QuickAppConfig(QuickApplication quickApp)
+        private void ConfigAuth(BasicAuthConfiguration<AuthUser> config)
+        {
+            config
+                .SetGetNameFunc(user => user.Name)
+                .SetLocateUserByNamePasswordFunc(
+                    (provider, name, pass) => UserData.Users.FirstOrDefault(u => u.Name == name && u.Password == pass));
+        }
+
+        private void QuickAppConfig(QuickApplication quickApp, IApplicationBuilder app)
         {
             quickApp
                 .AddMongoService("mongodb")
+                .AddBasicAuthService<AuthUser>("auth")
                 .AddInterceptor("mongodb", "InsertOne", Moment.Before, context =>
                 {
                     context.Arguments.document.name += " 2";
@@ -50,6 +62,8 @@ namespace QuickAppWebTest
                 })
                 .AddInterceptor("mongodb", new MongoInterceptorImplementingInterface())
                 .AddInterceptor("mongodb", new MongoInterceptorUsingMethodsNames());
+
+            app.UseQuickAppBasicAuth();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,7 +85,7 @@ namespace QuickAppWebTest
             app.UseStaticFiles();
 
             app.UseQuickApp(QuickAppConfig);
-
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

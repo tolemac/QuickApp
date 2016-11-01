@@ -42,6 +42,7 @@ namespace QuickApp.Services
                 callContext.Exception = ex;
                 CallInterceptorObjects(interceptors, callContext, Moment.OnException);
                 DistpatchOnExceptionInterceptors(serviceDescriptor, callContext);
+                throw callContext.Exception;
             }
 
             if (!CallInterceptorObjects(interceptors, callContext, Moment.After))

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using ServiceDescriptor = QuickApp.Services.ServiceDescriptor;
 
 namespace QuickApp.AspNetCore.Auth
 {
@@ -12,18 +13,23 @@ namespace QuickApp.AspNetCore.Auth
             var config = new BasicAuthConfiguration<TUser>();
             configAction?.Invoke(config);
             serviceCollection.AddSingleton(provider => config);
-            serviceCollection.AddScoped<BasicCookieAuthentication<TUser>>();
-            serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            serviceCollection.AddSingleton<BasicCookieAuthentication<TUser>>();
+            serviceCollection.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
+
             return serviceCollection;
         }
 
-        public static QuickApplication AddBasicAuthService<TUser>(this QuickApplication quickApp, string serviceName = null)
+        public static QuickApplication AddBasicAuthService<TUser>(this QuickApplication quickApp,
+            string serviceName = null, Action<ServiceDescriptor> configureService = null)
         {
             if (serviceName == null)
                 serviceName = "auth";
-            quickApp.AddService(new Services.ServiceDescriptor(serviceName,
-                    typeof(BasicCookieAuthentication<TUser>),
+            quickApp.AddService(
+                new ServiceDescriptor(serviceName, typeof(BasicCookieAuthentication<TUser>),
                     () => quickApp.ServiceProvider.GetService<BasicCookieAuthentication<TUser>>())
+                {
+                    RequireAuth = false
+                }, configureService
             );
             return quickApp;
         }

@@ -10,7 +10,7 @@ namespace QuickApp.Services
 
         public ServiceContainer AddService(ServiceDescriptor serviceDescriptor)
         {
-            _services.Add(serviceDescriptor.Name, new ServiceDescriptor(serviceDescriptor.Name, serviceDescriptor.Type, serviceDescriptor.CreationFunc));
+            _services.Add(serviceDescriptor.Name, serviceDescriptor);
             return this;
         }
 

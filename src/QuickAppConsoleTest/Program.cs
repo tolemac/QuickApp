@@ -19,7 +19,7 @@ namespace QuickAppConsoleTest
     {
         public static void Main(string[] args)
         {
-            var app = new QuickApplication();
+            var app = new QuickApplication(null);
             app.AddService(new ServiceDescriptor(typeof(Service1), () => new Service1()));
             app.AddService(new ServiceDescriptor(typeof(IMongoDbDatabaseService),
                 () => new MongoDbDatabaseService("mongodb://localhost:27017", "prueba")));

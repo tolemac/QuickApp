@@ -1,52 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json.Linq;
+using QuickApp.Exceptions;
 using QuickApp.Services.Interceptors;
 
 namespace QuickApp.Services
 {
     internal class ServiceMethodCaller
     {
-        private readonly ServiceContainer _container;
-
-        public ServiceMethodCaller(ServiceContainer container)
+        public object Call(CallContext callContext)
         {
-            _container = container;
-        }
 
-        public object Call(string serviceName, string methodName, object arguments)
-        {
-            return Call(serviceName, methodName, JObject.FromObject(arguments));
-        }
+            if (callContext.Service.MethodRequireAuth(callContext.MethodName) 
+                && !callContext.HttpContext.User.Identity.IsAuthenticated)
+            {
+                throw new AccessDeniedException($"Access denied calling '{callContext.MethodName}' method of '{callContext.Service.Name}' service.");
+                //throw new AccessDeniedException($"Access denied calling {callContext.Service.Name} service.");
+            }
 
-        public object Call(string serviceName, string methodName, JObject arguments)
-        {
-            var serviceDescriptor = _container.GetServiceDescriptorByName(serviceName);
-            
-            var callContext = new CallContext(serviceDescriptor, methodName, arguments);
-
-            var interceptors = serviceDescriptor.GetInterceptors().ToArray();
+            var interceptors = callContext.Service.GetInterceptors().ToArray();
 
             if (CallInterceptorObjects(interceptors, callContext, Moment.Before))
                 return callContext.Result;
-            if (DistpatchBeforeInterceptors(serviceDescriptor, callContext))
+            if (DistpatchBeforeInterceptors(callContext))
                 return callContext.Result;
 
             try
             {
-                callContext.Result = MethodCaller.Call(serviceDescriptor.Instance, methodName, arguments);
+                callContext.Result = MethodCaller.Call(callContext.Service.Instance, callContext.MethodName, callContext.Arguments);
             }
             catch (Exception ex)
             {
                 callContext.Exception = ex;
                 CallInterceptorObjects(interceptors, callContext, Moment.OnException);
-                DistpatchOnExceptionInterceptors(serviceDescriptor, callContext);
+                DistpatchOnExceptionInterceptors(callContext.Service, callContext);
                 throw callContext.Exception;
             }
 
             if (!CallInterceptorObjects(interceptors, callContext, Moment.After))
-                DistpatchAfterInterceptors(serviceDescriptor, callContext);
+                DistpatchAfterInterceptors(callContext);
 
             return callContext.Result;
         }
@@ -72,9 +64,9 @@ namespace QuickApp.Services
             }
         }
 
-        private static bool DistpatchBeforeInterceptors(ServiceDescriptor serviceDescriptor, CallContext callContext)
+        private static bool DistpatchBeforeInterceptors(CallContext callContext)
         {
-            var interceptors = serviceDescriptor.GetBeforeInterceptors(callContext.MethodName);
+            var interceptors = callContext.Service.GetBeforeInterceptors(callContext.MethodName);
             foreach (var interceptor in interceptors)
             {
                 interceptor.Action(callContext);
@@ -84,9 +76,9 @@ namespace QuickApp.Services
             return false;
         }
 
-        private static bool DistpatchAfterInterceptors(ServiceDescriptor serviceDescriptor, CallContext callContext)
+        private static bool DistpatchAfterInterceptors(CallContext callContext)
         {
-            var interceptors = serviceDescriptor.GetAfterInterceptors(callContext.MethodName);
+            var interceptors = callContext.Service.GetAfterInterceptors(callContext.MethodName);
             var preResult = callContext.Result;
             foreach (var interceptor in interceptors)
             {
@@ -99,3 +91,4 @@ namespace QuickApp.Services
 
     }
 }
+

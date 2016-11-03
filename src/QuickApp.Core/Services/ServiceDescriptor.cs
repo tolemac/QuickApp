@@ -7,6 +7,8 @@ namespace QuickApp.Services
 {
     public class ServiceDescriptor
     {
+        private readonly Dictionary<string, bool> _methodAuth = 
+            new Dictionary<string, bool>();
         private readonly List<InterceptorDescriptor> _interceptorDescriptors = 
             new List<InterceptorDescriptor>();
         private readonly List<IServiceMethodCallInterceptor> _interceptorObjects = 
@@ -72,6 +74,20 @@ namespace QuickApp.Services
         public IEnumerable<InterceptorDescriptor> GetOnExceptionInterceptors(string methodName)
         {
             return _interceptorDescriptors.Where(i => i.MethodName == methodName && i.Moment == Moment.OnException);
+        }
+
+        public ServiceDescriptor SetMethodAuth(string methodName, bool requireAuth)
+        {
+            _methodAuth[methodName] = requireAuth;
+            return this;
+        }
+
+        public bool MethodRequireAuth(string methodName)
+        {
+            if (!RequireAuth)
+                return _methodAuth.ContainsKey(methodName) && _methodAuth[methodName];
+
+            return !_methodAuth.ContainsKey(methodName) || _methodAuth[methodName];
         }
     }
 }

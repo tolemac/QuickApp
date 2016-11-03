@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using QuickApp.Services;
 using QuickApp.Services.Interceptors;
@@ -11,20 +12,21 @@ namespace QuickApp
         private readonly ServiceContainer _serviceContainer;
         private readonly ServiceMethodCaller _serviceMethodCaller;
 
-        public QuickApplication() : this(null)
-        {
+        //public QuickApplication() : this(null)
+        //{
 
-        }
+        //}
 
         public QuickApplication(IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;
             _serviceContainer = new ServiceContainer();
-            _serviceMethodCaller = new ServiceMethodCaller(_serviceContainer);
+            _serviceMethodCaller = new ServiceMethodCaller();
         }
 
-        public QuickApplication AddService(ServiceDescriptor serviceDescriptor)
+        public QuickApplication AddService(ServiceDescriptor serviceDescriptor, Action<ServiceDescriptor> configureService)
         {
+            configureService?.Invoke(serviceDescriptor);
             _serviceContainer.AddService(serviceDescriptor);
             return this;
         }
@@ -36,7 +38,14 @@ namespace QuickApp
 
         public object CallServiceMethod(string serviceName, string methodName, JObject arguments)
         {
-            return _serviceMethodCaller.Call(serviceName, methodName, arguments);
+            var serviceDescriptor = _serviceContainer.GetServiceDescriptorByName(serviceName);
+
+            var httpContext = ((IHttpContextAccessor) ServiceProvider
+                .GetService(typeof(IHttpContextAccessor))).HttpContext;
+
+            var callContext = new CallContext(httpContext, serviceDescriptor, methodName, arguments);
+
+            return _serviceMethodCaller.Call(callContext);
         }
 
         public QuickApplication AddInterceptor(string serviceName, string methodName, 

@@ -8,7 +8,6 @@ using QuickApp.AspNetCore.Auth;
 using QuickApp.MongoDb;
 using QuickApp.Services.Interceptors;
 using System.Linq;
-using QuickApp.AspNetCore.Mvc;
 
 namespace QuickAppWebTest
 {
@@ -84,14 +83,14 @@ namespace QuickAppWebTest
 
             app.UseStaticFiles();
 
-            app.UseQuickApp(QuickAppConfig);
+            app.UseQuickApp(configAction: QuickAppConfig);
             
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
-                routes.AddQuickAppRoute("qa");
+                //routes.AddQuickAppRoute("qa");
             });
 
         }

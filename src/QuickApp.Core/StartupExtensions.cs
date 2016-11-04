@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Dynamic;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using QuickApp.Services;
 
 namespace QuickApp
 {
@@ -16,7 +18,7 @@ namespace QuickApp
             return serviceCollection;
         }
 
-        private static void RequestHandler(IApplicationBuilder app, QuickApplication quickApp)
+        private static void RequestHandler(IApplicationBuilder app, QuickApplication quickApp, bool detailedExceptions)
         {
             app.Run(async handler =>
             {
@@ -42,7 +44,26 @@ namespace QuickApp
                     : JObject.Parse(bodyText);
 
                 //quickApp.CallServiceMethod(serviceName, methodName, arguments);
-                var callContext = await quickApp.CallServiceMethod(serviceName, methodName, arguments);
+                CallContext callContext;
+                try
+                {
+                    callContext = await quickApp.CallServiceMethod(serviceName, methodName, arguments);
+                }
+                catch (Exception ex)
+                {
+                    var resultError = new ExpandoObject() as dynamic;
+                    resultError.Error = ex.GetType().Name;
+                    resultError.Message = ex.Message;
+                    if (detailedExceptions)
+                        resultError.Exception = ex;
+
+                    handler.Response.StatusCode = 500;
+                    await HttpResponseWritingExtensions.WriteAsync(handler.Response, JsonConvert.SerializeObject(resultError));
+
+                    return;
+
+                }
+
                 if (!callContext.IsVoidMethod)
                 {
                     await HttpResponseWritingExtensions.WriteAsync(handler.Response, JsonConvert.SerializeObject(callContext.Result));
@@ -57,7 +78,7 @@ namespace QuickApp
         }
 
         public static IApplicationBuilder UseQuickApp(this IApplicationBuilder app, string startRouteSegment = "/qa",
-            Action<QuickApplication, IApplicationBuilder> configAction = null)
+            Action<QuickApplication, IApplicationBuilder> configAction = null, bool detailedExceptions = false)
         {
             var quickApp = app.ApplicationServices.GetService<QuickApplication>();
             configAction?.Invoke(quickApp, app);
@@ -68,7 +89,7 @@ namespace QuickApp
             app.MapWhen(context =>
                     context.Request.Path.StartsWithSegments(startRouteSegment)
                     && context.Request.ContentType.Contains("application/json"),
-                qaApp => RequestHandler(qaApp, quickApp));
+                qaApp => RequestHandler(qaApp, quickApp, detailedExceptions));
 
             return app;
         }

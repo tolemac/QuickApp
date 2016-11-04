@@ -83,7 +83,7 @@ namespace QuickAppWebTest
 
             app.UseStaticFiles();
 
-            app.UseQuickApp(configAction: QuickAppConfig);
+            app.UseQuickApp(configAction: QuickAppConfig, detailedExceptions: env.IsDevelopment());
             
             app.UseMvc(routes =>
             {

@@ -67,7 +67,7 @@ namespace QuickApp
                 startRouteSegment = "/" + startRouteSegment;
 
             app.MapWhen(context =>
-                    context.Request.Path.StartsWithSegments("/" + startRouteSegment)
+                    context.Request.Path.StartsWithSegments(startRouteSegment)
                     && context.Request.ContentType.Contains("application/json"),
                 qaApp => RequestHandler(qaApp, quickApp));
 

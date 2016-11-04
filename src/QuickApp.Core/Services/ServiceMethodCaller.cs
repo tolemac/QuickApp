@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using QuickApp.Exceptions;
 using QuickApp.Services.Interceptors;
 
@@ -8,7 +9,7 @@ namespace QuickApp.Services
 {
     internal class ServiceMethodCaller
     {
-        public object Call(CallContext callContext)
+        public async Task<dynamic> Call(CallContext callContext)
         {
 
             if (callContext.Service.MethodRequireAuth(callContext.MethodName) 
@@ -25,9 +26,10 @@ namespace QuickApp.Services
             if (DistpatchBeforeInterceptors(callContext))
                 return callContext.Result;
 
+            MethodCaller.CallMethodResult result;
             try
             {
-                callContext.Result = MethodCaller.Call(callContext.Service.Instance, callContext.MethodName, callContext.Arguments);
+                result = await MethodCaller.Call(callContext.Service.Instance, callContext.MethodName, callContext.Arguments);
             }
             catch (Exception ex)
             {
@@ -36,6 +38,10 @@ namespace QuickApp.Services
                 DistpatchOnExceptionInterceptors(callContext.Service, callContext);
                 throw callContext.Exception;
             }
+
+            callContext.Result = result.Result;
+            callContext.IsVoidMethod = result.IsVoid;
+
 
             if (!CallInterceptorObjects(interceptors, callContext, Moment.After))
                 DistpatchAfterInterceptors(callContext);

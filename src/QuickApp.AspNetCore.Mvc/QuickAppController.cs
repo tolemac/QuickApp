@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace QuickApp.AspNetCore.Mvc
 {
@@ -12,9 +13,9 @@ namespace QuickApp.AspNetCore.Mvc
         }
 
         [HttpPost]
-        public object CallServiceMethod(string serviceName, string methodName, [FromBody] dynamic payload)
+        public async Task<object> CallServiceMethod(string serviceName, string methodName, [FromBody] dynamic payload)
         {
-            return _app.CallServiceMethod(serviceName, methodName, payload);
+            return await _app.CallServiceMethod(serviceName, methodName, payload).Result;
         }
     }
 }

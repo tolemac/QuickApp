@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using QuickApp.Services;
@@ -31,12 +32,12 @@ namespace QuickApp
             return this;
         }
 
-        public object CallServiceMethod(string serviceName, string methodName, object arguments)
+        public async Task<CallContext> CallServiceMethod(string serviceName, string methodName, object arguments)
         {
-            return CallServiceMethod(serviceName, methodName, JObject.FromObject(arguments));
+            return await CallServiceMethod(serviceName, methodName, JObject.FromObject(arguments));
         }
 
-        public object CallServiceMethod(string serviceName, string methodName, JObject arguments)
+        public async Task<CallContext> CallServiceMethod(string serviceName, string methodName, JObject arguments)
         {
             var serviceDescriptor = _serviceContainer.GetServiceDescriptorByName(serviceName);
 
@@ -45,7 +46,9 @@ namespace QuickApp
 
             var callContext = new CallContext(httpContext, serviceDescriptor, methodName, arguments);
 
-            return _serviceMethodCaller.Call(callContext);
+            await _serviceMethodCaller.Call(callContext);
+
+            return callContext;
         }
 
         public QuickApplication AddInterceptor(string serviceName, string methodName, 

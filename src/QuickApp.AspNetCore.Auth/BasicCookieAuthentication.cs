@@ -45,7 +45,7 @@ namespace QuickApp.AspNetCore.Auth
             return true;
         }
 
-        public async void Logoff()
+        public async Task Logoff()
         {
             var httpContext = _serviceProvider.GetService<IHttpContextAccessor>().HttpContext;
             await httpContext.Authentication.SignOutAsync(BasicCookieAuthentication.AuthScheme);

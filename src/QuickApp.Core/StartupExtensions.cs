@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,10 +42,10 @@ namespace QuickApp
                     : JObject.Parse(bodyText);
 
                 //quickApp.CallServiceMethod(serviceName, methodName, arguments);
-                var result = quickApp.CallServiceMethod(serviceName, methodName, arguments);
-                if (result != null)
+                var callContext = await quickApp.CallServiceMethod(serviceName, methodName, arguments);
+                if (!callContext.IsVoidMethod)
                 {
-                    await handler.Response.WriteAsync(JsonConvert.SerializeObject(result));
+                    await HttpResponseWritingExtensions.WriteAsync(handler.Response, JsonConvert.SerializeObject(callContext.Result));
                     handler.Response.ContentType = "application/json; charset=utf-8";
                 }
                 else

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using QuickApp.Core.Exceptions;
 
@@ -9,6 +11,30 @@ namespace QuickApp
 {
     internal class MethodCaller
     {
+        internal class CallMethodResult
+        {
+            public object Result { get; }
+            public bool IsVoid { get; }
+
+            public CallMethodResult(object result, bool isVoid)
+            {
+                Result = result;
+                IsVoid = isVoid;
+            }
+        }
+
+        private static bool IsAsyncMethod(MethodInfo method)
+        {
+            var attType = typeof(AsyncStateMachineAttribute);
+
+            // Obtain the custom attribute for the method. 
+            // The value returned contains the StateMachineType property. 
+            // Null is returned if the attribute isn't present for the method. 
+            var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
+
+            return attrib != null;
+        }
+
         /// <summary>
         /// Llama a un metodo especifico de un servicio pasando los parametros en un objeto JObject
         /// </summary>
@@ -16,7 +42,7 @@ namespace QuickApp
         /// <param name="methodName">Nombre del metodo a llamar</param>
         /// <param name="parameters">Parametros del método en un JObject</param>
         /// <returns>El resultado de la llamada al método</returns>
-        public static object Call(object srv, string methodName, JObject parameters)
+        public static async Task<CallMethodResult> Call(object srv, string methodName, JObject parameters)
         {
             MethodInfo method;
             object[] methodParameters;
@@ -40,14 +66,35 @@ namespace QuickApp
                 throw new ParameterCreationExcepcion(srv.GetType(), methodName, parameters.ToString(), ex);
             }
 
+            var isAsync = IsAsyncMethod(method);
+            var isVoidMethod = method.ReturnType == typeof(void) ||
+                (method.ReturnType == typeof(Task));
+
+            object result = null;
             try
             {
-                return method.Invoke(srv, methodParameters);
+                if (isVoidMethod)
+                {
+                    if (isAsync)
+                        await (dynamic)method.Invoke(srv, methodParameters);
+                    else
+                        method.Invoke(srv, methodParameters);
+                }
+                else
+                {
+                    if (isAsync)
+                        result = await (dynamic)method.Invoke(srv, methodParameters);
+                    else
+                        result = method.Invoke(srv, methodParameters);
+                }
+                
             }
             catch (TargetInvocationException ex)
             {
                 throw ex.InnerException;
             }
+
+            return new CallMethodResult(result, isVoidMethod);
         }
 
         private static object[] CreateParameters(ParameterInfo[] methodParameters, JObject callParameters)

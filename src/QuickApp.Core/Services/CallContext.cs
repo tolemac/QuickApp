@@ -18,6 +18,7 @@ namespace QuickApp.Services
         public string MethodName { get; }
         public ServiceDescriptor Service { get; }
         public dynamic Result { get; set; }
+        public bool IsVoidMethod { get; set; }
         public Exception Exception { get; set; }
     }
 }

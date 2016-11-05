@@ -62,7 +62,7 @@ namespace QuickAppWebTest
                 .AddInterceptor("mongodb", new MongoInterceptorImplementingInterface())
                 .AddInterceptor("mongodb", new MongoInterceptorUsingMethodsNames());
 
-            app.UseQuickAppBasicAuth();
+            app.UseQuickAppBasicAuth<AuthUser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

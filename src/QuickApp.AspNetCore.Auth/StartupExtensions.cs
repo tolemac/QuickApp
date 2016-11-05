@@ -31,7 +31,7 @@ namespace QuickApp.AspNetCore.Auth
                 serviceName = "auth";
             quickApp.AddService(
                 new ServiceDescriptor(serviceName, typeof(IBasicCookieAuthentication),
-                    () => quickApp.ServiceProvider.GetService<BasicCookieAuthentication<TUser>>())
+                    () => quickApp.ServiceProvider.GetService<IBasicCookieAuthentication>())
                 {
                     RequireAuth = false
                 }, configureService

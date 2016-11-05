@@ -25,6 +25,11 @@ namespace QuickApp
 
         private static bool IsAsyncMethod(MethodInfo method)
         {
+            if (method.ReturnType == typeof(Task) || 
+                method.ReturnType.GetTypeInfo().IsGenericType &&
+                method.ReturnType.GetTypeInfo().BaseType == typeof(Task))
+                return true;
+
             var attType = typeof(AsyncStateMachineAttribute);
 
             // Obtain the custom attribute for the method. 
@@ -38,22 +43,23 @@ namespace QuickApp
         /// <summary>
         /// Llama a un metodo especifico de un servicio pasando los parametros en un objeto JObject
         /// </summary>
-        /// <param name="srv">Servicio donde localizar el método</param>
+        /// <param name="publicInterface">Tipo donde buscar el método</param>
+        /// <param name="srv">Servicio donde llamar el método</param>
         /// <param name="methodName">Nombre del metodo a llamar</param>
         /// <param name="parameters">Parametros del método en un JObject</param>
         /// <returns>El resultado de la llamada al método</returns>
-        public static async Task<CallMethodResult> Call(object srv, string methodName, JObject parameters)
+        public static async Task<CallMethodResult> Call(Type publicInterface, object srv, string methodName, JObject parameters)
         {
             MethodInfo method;
             object[] methodParameters;
 
             try
             {
-                method = LocateMethod(srv, methodName, parameters);
+                method = LocateMethod(publicInterface, methodName, parameters);
             }
             catch (Exception ex)
             {
-                throw new MethodLocatorExcepcion(srv.GetType(), methodName, parameters.ToString(), ex);
+                throw new MethodLocatorExcepcion(publicInterface, methodName, parameters.ToString(), ex);
             }
 
             try
@@ -63,7 +69,7 @@ namespace QuickApp
             catch (Exception ex)
             {
 
-                throw new ParameterCreationExcepcion(srv.GetType(), methodName, parameters.ToString(), ex);
+                throw new ParameterCreationExcepcion(publicInterface, methodName, parameters.ToString(), ex);
             }
 
             var isAsync = IsAsyncMethod(method);
@@ -107,18 +113,18 @@ namespace QuickApp
                         : callParameters[par.Name].ToObject(par.ParameterType)).ToArray();
         }
 
-        private static MethodInfo LocateMethod(object srv, string nombreMetodo, JObject parametros)
+        private static MethodInfo LocateMethod(Type srvInterface, string nombreMetodo, JObject parametros)
         {
             var nombreParametros = parametros != null ? parametros.Properties().Select(prop => prop.Name).ToList() : new List<string>();
 
             var metodo = nombreParametros.Count == 0
-                ? srv.GetType()
+                ? srvInterface
                     .GetMethods()
                     .First(
                         m =>
                             m.Name == nombreMetodo && !m.IsGenericMethod &&
                             m.GetParameters().Length == 0)
-                : srv.GetType()
+                : srvInterface
                     .GetMethods()
                     .First(
                         m =>

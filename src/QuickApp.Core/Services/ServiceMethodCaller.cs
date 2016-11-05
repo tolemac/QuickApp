@@ -29,7 +29,7 @@ namespace QuickApp.Services
             MethodCaller.CallMethodResult result;
             try
             {
-                result = await MethodCaller.Call(callContext.Service.Instance, callContext.MethodName, callContext.Arguments);
+                result = await MethodCaller.Call(callContext.Service.Type, callContext.Service.Instance, callContext.MethodName, callContext.Arguments);
             }
             catch (Exception ex)
             {

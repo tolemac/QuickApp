@@ -1,6 +1,8 @@
 ﻿using System;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceDescriptor = QuickApp.Services.ServiceDescriptor;
 
@@ -8,13 +10,15 @@ namespace QuickApp.AspNetCore.Auth
 {
     public static class StartupExtensions
     {
-        public static IServiceCollection AddQuickAppBasicAuth<TUser>(this IServiceCollection serviceCollection, Action<BasicAuthConfiguration<TUser>> configAction)
+        public static IServiceCollection AddQuickAppBasicAuth<TUser>(this IServiceCollection serviceCollection,
+            Action<BasicAuthConfiguration<TUser>> configAction)
         {
             var config = new BasicAuthConfiguration<TUser>();
             configAction?.Invoke(config);
             serviceCollection.AddSingleton(provider => config);
             serviceCollection.AddSingleton<BasicCookieAuthentication<TUser>>();
             serviceCollection.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
+            serviceCollection.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 
             return serviceCollection;
         }
@@ -34,13 +38,39 @@ namespace QuickApp.AspNetCore.Auth
             return quickApp;
         }
 
-        public static IApplicationBuilder UseQuickAppBasicAuth(this IApplicationBuilder app)
+        public static IApplicationBuilder UseQuickAppBasicAuth(this IApplicationBuilder app, Action<IApplicationBuilder> configOAuth = null)
         {
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
-                AuthenticationScheme = BasicCookieAuthentication.AuthScheme,
+                AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme,
                 AutomaticAuthenticate = true
             });
+
+            configOAuth?.Invoke(app);
+
+            app.MapWhen(context => context.Request.Path.StartsWithSegments("/externalLogin"),
+                conf =>
+                {
+                    conf.Run(async handler =>
+                    {
+                        var provider = handler.Request.Query["provider"].ToString();
+                        var returnUrl = handler.Request.Query["returnUrl"].ToString();
+                        var httpContext = handler.Request.HttpContext;
+
+                        var authenticationProperties = new AuthenticationProperties()
+                        {
+                            RedirectUri = returnUrl
+                        };
+
+                        //string userId = null;
+                        authenticationProperties.Items["LoginProvider"] = provider;
+                        //if (userId != null)
+                        //    authenticationProperties.Items["XsrfId"] = userId;
+                        //return Challenge(authenticationProperties, provider);
+
+                        await httpContext.Authentication.ChallengeAsync(provider, authenticationProperties);
+                    });
+                });
             return app;
         }
     }

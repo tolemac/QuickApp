@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace QuickApp.AspNetCore.Auth
 {
-    public class BasicCookieAuthentication
-    {
-        public const string AuthScheme = "QuickApp.BasicCookieAuthentication";
-    }
-
     public class BasicCookieAuthentication<TUser>
     {
         private readonly BasicAuthConfiguration<TUser> _configuration;
@@ -40,15 +36,15 @@ namespace QuickApp.AspNetCore.Auth
 
             var httpContext = _serviceProvider.GetService<IHttpContextAccessor>().HttpContext;
 
-            var identity = new ClaimsIdentity(claims, BasicCookieAuthentication.AuthScheme);
-            await httpContext.Authentication.SignInAsync(BasicCookieAuthentication.AuthScheme, new ClaimsPrincipal(identity), props);
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await httpContext.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), props);
             return true;
         }
 
         public async Task Logoff()
         {
             var httpContext = _serviceProvider.GetService<IHttpContextAccessor>().HttpContext;
-            await httpContext.Authentication.SignOutAsync(BasicCookieAuthentication.AuthScheme);
+            await httpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
     }
 }

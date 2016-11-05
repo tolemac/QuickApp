@@ -9,7 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace QuickApp.AspNetCore.Auth
 {
-    public class BasicCookieAuthentication<TUser>
+    public interface IBasicCookieAuthentication
+    {
+        Task<bool> Login(string name, string password, bool persistCookie = false);
+        Task Logoff();
+    }
+
+    public class BasicCookieAuthentication<TUser> : IBasicCookieAuthentication
     {
         private readonly BasicAuthConfiguration<TUser> _configuration;
         private readonly IServiceProvider _serviceProvider;
@@ -21,12 +27,11 @@ namespace QuickApp.AspNetCore.Auth
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<bool> Login(string name, string password, bool persistCookie = false)
+        public async Task SignIn(TUser user, bool persistCookie)
         {
-            var myUser = _configuration.LocateUserByNamePasswordFunc(_serviceProvider, name, password);
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, _configuration.GetNameFunc(myUser))
+                new Claim(ClaimTypes.Name, _configuration.GetNameFunc(user))
             };
             var props = new AuthenticationProperties
             {
@@ -38,6 +43,12 @@ namespace QuickApp.AspNetCore.Auth
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await httpContext.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), props);
+        }
+
+        public async Task<bool> Login(string name, string password, bool persistCookie = false)
+        {
+            var myUser = _configuration.LocateUserByNamePasswordFunc(_serviceProvider, name, password);
+            await SignIn(myUser, persistCookie);
             return true;
         }
 

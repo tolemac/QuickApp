@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +17,7 @@ namespace QuickApp.AspNetCore.Auth
             var config = new BasicAuthConfiguration<TUser>();
             configAction?.Invoke(config);
             serviceCollection.AddSingleton(provider => config);
-            serviceCollection.AddSingleton<BasicCookieAuthentication<TUser>>();
+            serviceCollection.AddSingleton<IBasicCookieAuthentication, BasicCookieAuthentication<TUser>>();
             serviceCollection.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
             serviceCollection.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -29,7 +30,7 @@ namespace QuickApp.AspNetCore.Auth
             if (serviceName == null)
                 serviceName = "auth";
             quickApp.AddService(
-                new ServiceDescriptor(serviceName, typeof(BasicCookieAuthentication<TUser>),
+                new ServiceDescriptor(serviceName, typeof(IBasicCookieAuthentication),
                     () => quickApp.ServiceProvider.GetService<BasicCookieAuthentication<TUser>>())
                 {
                     RequireAuth = false
@@ -38,7 +39,7 @@ namespace QuickApp.AspNetCore.Auth
             return quickApp;
         }
 
-        public static IApplicationBuilder UseQuickAppBasicAuth(this IApplicationBuilder app, Action<IApplicationBuilder> configOAuth = null)
+        public static IApplicationBuilder UseQuickAppBasicAuth<TUser>(this IApplicationBuilder app, Action<IApplicationBuilder> configOAuth = null)
         {
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
@@ -47,6 +48,21 @@ namespace QuickApp.AspNetCore.Auth
             });
 
             configOAuth?.Invoke(app);
+            app.MapWhen(context => context.Request.Path.StartsWithSegments("/externalLoginCallback"), conf =>
+            {
+                conf.Run(async handler =>
+                {
+                    var returnUrl = handler.Request.Query["returnUrl"].ToString();
+                    var httpContext = handler.Request.HttpContext;
+
+                    var authService = (BasicCookieAuthentication<TUser>)conf.ApplicationServices.GetService<IBasicCookieAuthentication>();
+                    var configuration = conf.ApplicationServices.GetService<BasicAuthConfiguration<TUser>>();
+                    await authService.Logoff();
+                    await authService.SignIn(configuration.LocateUserByExternalLogin(conf.ApplicationServices, httpContext.User), true);
+                    
+                    httpContext.Response.Redirect(returnUrl);
+                });
+            });
 
             app.MapWhen(context => context.Request.Path.StartsWithSegments("/externalLogin"),
                 conf =>
@@ -54,7 +70,7 @@ namespace QuickApp.AspNetCore.Auth
                     conf.Run(async handler =>
                     {
                         var provider = handler.Request.Query["provider"].ToString();
-                        var returnUrl = handler.Request.Query["returnUrl"].ToString();
+                        var returnUrl = "/externalLoginCallback?returnUrl=" + handler.Request.Query["returnUrl"].ToString();
                         var httpContext = handler.Request.HttpContext;
 
                         var authenticationProperties = new AuthenticationProperties()

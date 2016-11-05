@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Principal;
 
 namespace QuickApp.AspNetCore.Auth
 {
@@ -7,10 +8,19 @@ namespace QuickApp.AspNetCore.Auth
         public Func<IServiceProvider, string, string, TUser> LocateUserByNamePasswordFunc { get; private set; }
         //public Func<IServiceProvider, string, TUser> LocateUserByNameFunc { get; private set; }
         public Func<TUser, string> GetNameFunc { get; private set; }
+        public Func<IServiceProvider, IPrincipal, TUser> LocateUserByExternalLogin { get; private set; }
 
-        public BasicAuthConfiguration<TUser> SetLocateUserByNamePasswordFunc(Func<IServiceProvider, string, string, TUser> func)
+        public BasicAuthConfiguration<TUser> SetLocateUserByNamePasswordFunc(
+            Func<IServiceProvider, string, string, TUser> func)
         {
             LocateUserByNamePasswordFunc = func;
+            return this;
+        }
+
+        public BasicAuthConfiguration<TUser> SetLocateUserByExternalLogin(
+            Func<IServiceProvider, IPrincipal, TUser> func)
+        {
+            LocateUserByExternalLogin = func;
             return this;
         }
 

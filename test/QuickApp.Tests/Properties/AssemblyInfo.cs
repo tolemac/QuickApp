@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("QuickApp.Core")]
+[assembly: AssemblyProduct("QuickApp.Tests")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -16,6 +16,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("a8e20df3-ba68-4ecc-83b5-21c61705fd07")]
-
-[assembly: InternalsVisibleTo("QuickApp.Tests")]
+[assembly: Guid("228c141c-e210-4841-8e39-efc74f184905")]

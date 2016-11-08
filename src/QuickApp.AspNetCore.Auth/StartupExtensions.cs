@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +23,7 @@ namespace QuickApp.AspNetCore.Auth
             return serviceCollection;
         }
 
-        public static QuickApplication AddBasicAuthService<TUser>(this QuickApplication quickApp,
+        public static QuickApplication AddBasicAuthService(this QuickApplication quickApp,
             string serviceName = null, Action<ServiceDescriptor> configureService = null)
         {
             if (serviceName == null)

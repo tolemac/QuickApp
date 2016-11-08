@@ -20,7 +20,7 @@ namespace QuickApp.MongoDb
         {
             if (serviceName == null)
                 serviceName = "mongodb";
-            quickApp.AddService(new Services.ServiceDescriptor(serviceName,
+            quickApp.AddService(new ServiceDescriptor(serviceName,
                 typeof(IMongoDbDatabaseService),
                 () => quickApp.ServiceProvider.GetService<IMongoDbDatabaseService>()
             ), configureService);

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using QuickApp.Core.Exceptions;
+using QuickApp.Exceptions;
 
 namespace QuickApp
 {

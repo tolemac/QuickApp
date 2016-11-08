@@ -82,7 +82,7 @@ namespace QuickApp.Services
             return false;
         }
 
-        private static bool DistpatchAfterInterceptors(CallContext callContext)
+        private static void DistpatchAfterInterceptors(CallContext callContext)
         {
             var interceptors = callContext.Service.GetAfterInterceptors(callContext.MethodName);
             var preResult = callContext.Result;
@@ -90,9 +90,8 @@ namespace QuickApp.Services
             {
                 interceptor.Action(callContext);
                 if (callContext.Result != preResult)
-                    return true;
+                    return;
             }
-            return false;
         }
 
     }

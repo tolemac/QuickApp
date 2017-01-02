@@ -194,3 +194,65 @@ services
 ````
 
 Moment es un enumerado de After, Before y OnException.
+
+## Autenticación y OAUTH
+
+Se puede usar autenticación:
+
+````
+public void ConfigureServices(IServiceCollection services)
+{
+    ...
+    services.AddQuickApp();
+    ...
+    services.AddQuickAppBasicAuth<AuthUser>(ConfigAuth);
+}
+````
+
+`AuthUser` es el tipo de la entidad usuario, puede ser un tipo o también dynamic, no hay restrincciones.
+`ConfigAuth` es una acción donde se configuran algunas cosas:
+
+````
+private void ConfigAuth(BasicAuthConfiguration<AuthUser> config)
+{
+    config
+        .SetGetNameFunc(user => user.Name)
+        .SetLocateUserByNamePasswordFunc(
+            (provider, name, pass) => UserData.Users.FirstOrDefault(u => u.Name == name && u.Password == pass))
+        .SetLocateUserByPrincipal((serviceProvider, principal) =>
+        {
+            var appSrv = serviceProvider.GetService<AppService>();
+            return appSrv.GetOrCreateUserByPrincipal(principal);
+        });
+}
+````
+Basicamente se configuran algunos métodos para trabajar con los usuarios.
+
+Por último en el método Configure:
+
+````
+app.UseQuickAppBasicAuth<AuthUser>(oauthConfig =>
+{
+    oauthConfig.UseGoogleAuthentication(new GoogleOptions
+    {
+        ClientId = Configuration["Authentication:Google:ClientId"],
+        ClientSecret = Configuration["Authentication:Google:ClientSecret"],
+        AutomaticAuthenticate = true,
+        AutomaticChallenge = true,
+        Scope = { "email", "openid" }
+    });
+});
+````
+
+Ya tenemos oauth.
+
+## Quitar MVC
+MVC ya no es necesario.
+Las llamadas al servidor se cazan usando un midleware propio.
+
+## ¿Siguiente paso?
+
+Mediante una aplicación personal he estado probandolo todo y más o menos me gusta. Me hace falta formalizar un poco el proyecto.
+
+Todavía no se si orientar el proyecto como un ApiPublisher, es decir, como un a forma facil de publicar nuestra api en proyectos web o seguir con el enfoque del acceso a la base de datos.
+Posiblemente lo que haga serán las dos cosas dividiendo el proyecto en vários.

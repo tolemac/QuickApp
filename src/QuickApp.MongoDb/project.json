@@ -2,10 +2,10 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "MongoDB.Bson": "2.3.0",
-    "MongoDB.Driver": "2.3.0",
-    "MongoDB.Driver.Core": "2.3.0",
-    "NETStandard.Library": "1.6.0",
+    "MongoDB.Bson": "2.4.0",
+    "MongoDB.Driver": "2.4.0",
+    "MongoDB.Driver.Core": "2.4.0",
+    "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "9.0.1",
     "QuickApp.Core": "1.0.0"
   },

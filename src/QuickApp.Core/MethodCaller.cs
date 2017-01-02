@@ -123,7 +123,8 @@ namespace QuickApp
                     .First(
                         m =>
                             m.Name == nombreMetodo && !m.IsGenericMethod &&
-                            m.GetParameters().Length == 0)
+                            (m.GetParameters().Length == 0 ||
+                            m.GetParameters().All(p => p.HasDefaultValue)))
                 : srvInterface
                     .GetMethods()
                     .First(

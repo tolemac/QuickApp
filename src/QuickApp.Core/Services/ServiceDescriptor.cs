@@ -13,8 +13,9 @@ namespace QuickApp.Services
             new List<InterceptorDescriptor>();
         private readonly List<IServiceMethodCallInterceptor> _interceptorObjects = 
             new List<IServiceMethodCallInterceptor>();
-        private object _instance;
-        public object Instance => _instance ?? (_instance = CreateInstance());
+        //private object _instance;
+        //public object Instance => _instance ?? (_instance = CreateInstance());
+        public object Instance => CreateInstance();
 
         public string Name { get; }
         public Type Type { get; }

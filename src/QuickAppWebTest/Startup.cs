@@ -49,7 +49,7 @@ namespace QuickAppWebTest
         {
             quickApp
                 .AddMongoService("mongodb")
-                .AddBasicAuthService<AuthUser>("auth")
+                .AddBasicAuthService("auth")
                 .AddInterceptor("mongodb", "InsertOne", Moment.Before, context =>
                 {
                     context.Arguments.document.name += " 2";

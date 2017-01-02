@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Dynamic;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace QuickApp.MongoDb
 {
@@ -17,7 +19,15 @@ namespace QuickApp.MongoDb
 
         private BsonDocument Bson(dynamic obj)
         {
-            return obj == null? null : BsonDocument.Parse(JsonConvert.SerializeObject(obj));
+            BsonDocument result = null;
+            if (obj != null)
+            {
+                result = BsonDocument.Parse(JsonConvert.SerializeObject(obj));
+                if (result.Contains("_id"))
+                    result["_id"] = ObjectId.Parse(obj._id.ToString());
+            }
+            return result;
+            //return obj == null? null : BsonDocument.Parse(JsonConvert.SerializeObject(obj));
         }
 
         public void InsertOne(string collectionName, dynamic document)
@@ -42,13 +52,15 @@ namespace QuickApp.MongoDb
             return _db.GetCollection<BsonDocument>(collectionName).Count(new BsonDocumentFilterDefinition<BsonDocument>(innerFilter));
         }
 
-        public dynamic Get(string collectionName, string id)
+        public dynamic GetById(string collectionName, string id)
         {
             var filter = Builders<dynamic>.Filter.Eq("_id", ObjectId.Parse(id));
-            return _db.GetCollection<dynamic>(collectionName).Find(filter).FirstOrDefault();
+            var result = _db.GetCollection<dynamic>(collectionName).Find(filter).FirstOrDefault();
+            result._id = result._id.ToString();
+            return result;
         }
 
-        public IEnumerable<dynamic> Find(string collectionName, 
+        public IList<dynamic> Find(string collectionName, 
             dynamic filter = null, dynamic order = null, dynamic projection = null, 
             int skip = 0, int take = 10)
         {
@@ -58,8 +70,30 @@ namespace QuickApp.MongoDb
                 query = query.Sort(new BsonDocumentSortDefinition<dynamic>(Bson(order)));
             if (projection != null)
                 query = query.Project(new BsonDocumentProjectionDefinition<dynamic, dynamic>(Bson(projection)));
-            return query.Skip(skip).Limit(take).ToList();
+            query = query.Skip(skip);
+            if (take != - 1)
+            {
+                query = query.Limit(take);
+            }
+            var result = query.ToList();
+            foreach (var o in result)
+            {
+                var obj = o as ExpandoObject as IDictionary<string, object>;
+                if (obj != null && obj.ContainsKey("_id"))
+                    o._id = o._id.ToString();
+            }
+            return result;
+        }
 
+        public dynamic FirstOrNull(string collectionName,
+            dynamic filter = null, dynamic order = null, dynamic projection = null)
+        {
+            var result = Find(collectionName, filter, order, projection, 0, 1) as IList<dynamic>;
+            if (result != null && result.Count > 0)
+            {
+                return result[0];
+            }
+            return null;
         }
 
         public void UpdateOne(string collectionName, dynamic filter, dynamic update)

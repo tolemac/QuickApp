@@ -13,6 +13,7 @@ namespace QuickApp.AspNetCore.Auth
     {
         Task<bool> Login(string name, string password, bool persistCookie = false);
         Task Logoff();
+        Task<dynamic> UserInfo();
     }
 
     public class BasicCookieAuthentication<TUser> : IBasicCookieAuthentication
@@ -56,6 +57,13 @@ namespace QuickApp.AspNetCore.Auth
         {
             var httpContext = _serviceProvider.GetService<IHttpContextAccessor>().HttpContext;
             await httpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        public async Task<dynamic> UserInfo()
+        {
+            var httpContext = _serviceProvider.GetService<IHttpContextAccessor>().HttpContext;
+            
+            return await Task.FromResult(_configuration.LocateUserByPrincipal(_serviceProvider, httpContext.User));
         }
     }
 }

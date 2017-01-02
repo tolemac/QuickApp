@@ -10,7 +10,7 @@ using QuickApp.Services;
 
 namespace QuickApp
 {
-    public static class StartupExtensions
+    public static class CoreStartupExtensions
     {
         public static IServiceCollection AddQuickApp(this IServiceCollection serviceCollection)
         {
@@ -66,8 +66,8 @@ namespace QuickApp
 
                 if (!callContext.IsVoidMethod)
                 {
-                    await HttpResponseWritingExtensions.WriteAsync(handler.Response, JsonConvert.SerializeObject(callContext.Result));
                     handler.Response.ContentType = "application/json; charset=utf-8";
+                    await HttpResponseWritingExtensions.WriteAsync(handler.Response, JsonConvert.SerializeObject(callContext.Result));
                 }
                 else
                 {

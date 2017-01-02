@@ -8,7 +8,7 @@ using ServiceDescriptor = QuickApp.Services.ServiceDescriptor;
 
 namespace QuickApp.AspNetCore.Auth
 {
-    public static class StartupExtensions
+    public static class AuthStartupExtensions
     {
         public static IServiceCollection AddQuickAppBasicAuth<TUser>(this IServiceCollection serviceCollection,
             Action<BasicAuthConfiguration<TUser>> configAction)
@@ -51,15 +51,26 @@ namespace QuickApp.AspNetCore.Auth
             {
                 conf.Run(async handler =>
                 {
-                    var returnUrl = handler.Request.Query["returnUrl"].ToString();
-                    var httpContext = handler.Request.HttpContext;
+                    string returnUrl = null;
+                    if (handler.Request.Query.ContainsKey("returnUrl"))
+                    {
+                        returnUrl = handler.Request.Query["returnUrl"].ToString();
+                    }
 
                     var authService = (BasicCookieAuthentication<TUser>)conf.ApplicationServices.GetService<IBasicCookieAuthentication>();
                     var configuration = conf.ApplicationServices.GetService<BasicAuthConfiguration<TUser>>();
                     await authService.Logoff();
-                    await authService.SignIn(configuration.LocateUserByExternalLogin(conf.ApplicationServices, httpContext.User), true);
-                    
-                    httpContext.Response.Redirect(returnUrl);
+                    await authService.SignIn(configuration.LocateUserByPrincipal(conf.ApplicationServices, handler.User), true);
+
+                    if (!string.IsNullOrWhiteSpace(returnUrl))
+                        handler.Response.Redirect(returnUrl);
+                    else
+                    {
+                        const string autoCloseResponseContent = 
+                            @"<!DOCTYPE html><html><head><script>window.close();</script></head><body></body></html>";
+                        handler.Response.ContentType = "text/html";
+                        await handler.Response.WriteAsync(autoCloseResponseContent);
+                    }
                 });
             });
 

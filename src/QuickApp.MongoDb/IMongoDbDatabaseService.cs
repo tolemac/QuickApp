@@ -6,10 +6,12 @@ namespace QuickApp.MongoDb
     {
         void InsertOne(string collectionName, dynamic document);
         long Count(string collectionName, dynamic filter);
-        dynamic Get(string collectionName, string id);
-        IEnumerable<dynamic> Find(string collectionName,
+        dynamic GetById(string collectionName, string id);
+        IList<dynamic> Find(string collectionName,
             dynamic filter = null, dynamic order = null, dynamic projection = null,
             int skip = 0, int take = 10);
+        dynamic FirstOrNull(string collectionName,
+            dynamic filter = null, dynamic order = null, dynamic projection = null);
         void UpdateOne(string collectionName, dynamic filter, dynamic update);
         void UpdateMany(string collectionName, dynamic filter, dynamic update);
         void DeleteOne(string collectionName, dynamic filter);

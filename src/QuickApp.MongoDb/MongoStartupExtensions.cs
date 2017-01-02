@@ -4,7 +4,7 @@ using ServiceDescriptor = QuickApp.Services.ServiceDescriptor;
 
 namespace QuickApp.MongoDb
 {
-    public static class StartupExtensions
+    public static class MongoStartupExtensions
     {
         public static IServiceCollection AddQuickAppMongoService(this IServiceCollection serviceCollection, string connectionString,
             string databaseName)

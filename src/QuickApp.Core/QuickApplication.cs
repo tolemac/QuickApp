@@ -25,7 +25,7 @@ namespace QuickApp
             _serviceMethodCaller = new ServiceMethodCaller();
         }
 
-        public QuickApplication AddService(ServiceDescriptor serviceDescriptor, Action<ServiceDescriptor> configureService)
+        public QuickApplication AddService(ServiceDescriptor serviceDescriptor, Action<ServiceDescriptor> configureService = null)
         {
             configureService?.Invoke(serviceDescriptor);
             _serviceContainer.AddService(serviceDescriptor);

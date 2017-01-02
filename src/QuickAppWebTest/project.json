@@ -26,8 +26,7 @@
     "System.Reflection.TypeExtensions": "4.1.0",
     "QuickApp.Core": "1.0.0",
     "QuickApp.MongoDb": "1.0.0-*",
-    "QuickApp.AspNetCore.Auth": "1.0.0-*",
-    "QuickApp.AspNetCore.Mvc": "1.0.0-*"  },
+    "QuickApp.AspNetCore.Auth": "1.0.0-*" },
 
   "tools": {
     "BundlerMinifier.Core": "2.0.238",

@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using QuickApp.Core.Exceptions;
+using QuickApp.Exceptions;
 
 namespace QuickApp.Tests
 {

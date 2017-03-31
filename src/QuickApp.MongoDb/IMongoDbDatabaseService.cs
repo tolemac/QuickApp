@@ -5,6 +5,7 @@ namespace QuickApp.MongoDb
     public interface IMongoDbDatabaseService
     {
         void InsertOne(string collectionName, dynamic document);
+        void InsertMany(string collectionName, IEnumerable<dynamic> document);
         long Count(string collectionName, dynamic filter);
         dynamic GetById(string collectionName, string id);
         IList<dynamic> Find(string collectionName,
